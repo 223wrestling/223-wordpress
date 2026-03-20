@@ -28,51 +28,52 @@ function wrestling_sync_related_techniques( int $post_id ): void {
         return;
     }
     $running[ $post_id ] = true;
+    try {
+        // IDs this technique currently lists as related (already saved by ACF).
+        $related_ids = get_field( 'related_techniques', $post_id ) ?: [];
+        $related_ids = array_map( 'intval', (array) $related_ids );
 
-    // IDs this technique currently lists as related (already saved by ACF).
-    $related_ids = get_field( 'related_techniques', $post_id ) ?: [];
-    $related_ids = array_map( 'intval', (array) $related_ids );
+        // For each related technique, ensure this post appears in its list.
+        foreach ( $related_ids as $other_id ) {
+            if ( ! $other_id ) {
+                continue;
+            }
+            $other_related = get_field( 'related_techniques', $other_id ) ?: [];
+            $other_related = array_map( 'intval', (array) $other_related );
 
-    // For each related technique, ensure this post appears in its list.
-    foreach ( $related_ids as $other_id ) {
-        if ( ! $other_id ) {
-            continue;
+            if ( ! in_array( $post_id, $other_related, true ) ) {
+                $other_related[] = $post_id;
+                update_field( 'related_techniques', $other_related, $other_id );
+            }
         }
-        $other_related = get_field( 'related_techniques', $other_id ) ?: [];
-        $other_related = array_map( 'intval', (array) $other_related );
 
-        if ( ! in_array( $post_id, $other_related, true ) ) {
-            $other_related[] = $post_id;
+        // Find all techniques that still reference this post but are no longer in our list.
+        // Query by serialized ACF meta value (ACF stores relationship as serialized PHP string).
+        $referencing = get_posts( [
+            'post_type'      => 'technique',
+            'posts_per_page' => -1,
+            'post__not_in'   => [ $post_id ],
+            'fields'         => 'ids',
+            'meta_query'     => [ [
+                'key'     => 'related_techniques',
+                'value'   => '"' . $post_id . '"',
+                'compare' => 'LIKE',
+            ] ],
+        ] );
+
+        foreach ( $referencing as $other_id ) {
+            if ( in_array( $other_id, $related_ids, true ) ) {
+                continue; // Still related — leave it.
+            }
+            // Remove back-reference.
+            $other_related = get_field( 'related_techniques', $other_id ) ?: [];
+            $other_related = array_map( 'intval', (array) $other_related );
+            $other_related = array_values( array_filter( $other_related, fn( $id ) => $id !== $post_id ) );
             update_field( 'related_techniques', $other_related, $other_id );
         }
+    } finally {
+        unset( $running[ $post_id ] );
     }
-
-    // Find all techniques that still reference this post but are no longer in our list.
-    // Query by serialized ACF meta value (ACF stores relationship as serialized array).
-    $referencing = get_posts( [
-        'post_type'      => 'technique',
-        'posts_per_page' => -1,
-        'post__not_in'   => [ $post_id ],
-        'fields'         => 'ids',
-        'meta_query'     => [ [
-            'key'     => 'related_techniques',
-            'value'   => '"' . $post_id . '"',
-            'compare' => 'LIKE',
-        ] ],
-    ] );
-
-    foreach ( $referencing as $other_id ) {
-        if ( in_array( $other_id, $related_ids, true ) ) {
-            continue; // Still related — leave it.
-        }
-        // Remove back-reference.
-        $other_related = get_field( 'related_techniques', $other_id ) ?: [];
-        $other_related = array_map( 'intval', (array) $other_related );
-        $other_related = array_values( array_filter( $other_related, fn( $id ) => $id !== $post_id ) );
-        update_field( 'related_techniques', $other_related, $other_id );
-    }
-
-    unset( $running[ $post_id ] );
 }
 
 // ── Hook 2: Appears-in-flowcharts ────────────────────────────────────────────
