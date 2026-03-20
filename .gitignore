@@ -1,8 +1,9 @@
 # Docker persistent data
 docker/data/
 
-# WordPress uploads
-wp-content/uploads/
+# WordPress uploads (content gitignored, but directory tracked)
+wp-content/uploads/*
+!wp-content/uploads/.gitkeep
 
 # Environment secrets
 .env
