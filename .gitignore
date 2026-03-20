@@ -1,0 +1,13 @@
+# Docker persistent data
+docker/data/
+
+# WordPress uploads
+wp-content/uploads/
+
+# Environment secrets
+.env
+docker/.env
+
+# OS
+.DS_Store
+Thumbs.db
