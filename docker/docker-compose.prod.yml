@@ -1,0 +1,36 @@
+services:
+  db:
+    image: mysql:8.0
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+    env_file: .env
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u $$MYSQL_USER -p$$MYSQL_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  wordpress:
+    image: wordpress:6.7-php8.2-apache
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./data/wordpress:/var/www/html
+      - ../wp-content:/var/www/html/wp-content
+    env_file: .env
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./data/caddy_data:/data
+      - ./data/caddy_config:/config
+    depends_on:
+      - wordpress
+    restart: unless-stopped
