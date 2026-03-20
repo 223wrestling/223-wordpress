@@ -16,6 +16,10 @@ define( 'WRESTLING_CORE_VERSION', '1.0.0' );
 define( 'WRESTLING_CORE_DIR', plugin_dir_path( __FILE__ ) );
 define( 'WRESTLING_CORE_URL', plugin_dir_url( __FILE__ ) );
 
+register_activation_hook( __FILE__, function () {
+    update_option( 'wrestling_flush_rewrite', true );
+} );
+
 require_once WRESTLING_CORE_DIR . 'includes/cpts.php';
 require_once WRESTLING_CORE_DIR . 'includes/roles.php';
 require_once WRESTLING_CORE_DIR . 'includes/hooks.php';

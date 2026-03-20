@@ -168,7 +168,3 @@ function wrestling_register_cpts(): void {
     }
 }
 
-// Set flag to flush rewrite rules on plugin activation.
-register_activation_hook( WRESTLING_CORE_DIR . 'wrestling-core.php', function () {
-    add_option( 'wrestling_flush_rewrite', true );
-} );
