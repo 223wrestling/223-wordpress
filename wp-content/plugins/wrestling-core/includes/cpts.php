@@ -142,7 +142,7 @@ function wrestling_register_cpts(): void {
             'edit_item'     => 'Edit Category',
             'add_new_item'  => 'Add New Category',
         ],
-        'hierarchical'      => true,
+        'hierarchical'      => false,
         'show_in_rest'      => true,
         'show_admin_column' => true,
         'rewrite'           => [ 'slug' => 'technique-category' ],
