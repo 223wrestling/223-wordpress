@@ -1,0 +1,12 @@
+# Persistent data — never commit these
+data/
+
+# Secrets
+.env
+
+# Caddy config with real domain (copy from Caddyfile.example)
+Caddyfile
+
+# Caddy TLS certificates and state
+data/caddy_data/
+data/caddy_config/
