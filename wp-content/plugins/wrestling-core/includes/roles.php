@@ -45,11 +45,24 @@ function wrestling_register_coach_role(): void {
     remove_role( 'coach' );
 
     add_role( 'coach', 'Coach', $caps );
+
+    // Grant the same CPT caps to the administrator role so admins can see/manage all CPTs.
+    $admin = get_role( 'administrator' );
+    if ( $admin ) {
+        foreach ( array_keys( $caps ) as $cap ) {
+            $admin->add_cap( $cap );
+        }
+    }
 }
 
 // Also register on init so the role exists even after a database wipe / fresh WP install.
 add_action( 'init', function () {
     if ( ! get_role( 'coach' ) ) {
+        wrestling_register_coach_role();
+    }
+    // Ensure admin always has CPT caps (handles fresh installs and role resets).
+    $admin = get_role( 'administrator' );
+    if ( $admin && ! $admin->has_cap( 'edit_techniques' ) ) {
         wrestling_register_coach_role();
     }
 } );
