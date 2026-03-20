@@ -47,9 +47,6 @@ function wrestling_register_coach_role(): void {
     add_role( 'coach', 'Coach', $caps );
 }
 
-// Register on activation.
-register_activation_hook( WRESTLING_CORE_DIR . 'wrestling-core.php', 'wrestling_register_coach_role' );
-
 // Also register on init so the role exists even after a database wipe / fresh WP install.
 add_action( 'init', function () {
     if ( ! get_role( 'coach' ) ) {

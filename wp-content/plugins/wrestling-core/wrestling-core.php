@@ -18,6 +18,7 @@ define( 'WRESTLING_CORE_URL', plugin_dir_url( __FILE__ ) );
 
 register_activation_hook( __FILE__, function () {
     update_option( 'wrestling_flush_rewrite', true );
+    wrestling_register_coach_role();
 } );
 
 require_once WRESTLING_CORE_DIR . 'includes/cpts.php';
